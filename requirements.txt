@@ -1,0 +1,4 @@
+flask
+whisper
+yt-dlp
+ffmpeg-python
