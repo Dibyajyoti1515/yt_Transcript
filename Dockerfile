@@ -1,34 +1,33 @@
-# Use official Python image
 FROM python:3.10-slim
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# Install git (needed to install whisper from GitHub)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp manually (latest version)
+# Upgrade pip
 RUN pip install --upgrade pip
+
+# Install yt-dlp
 RUN pip install yt-dlp
 
-# Copy requirements
+# Install PyTorch (CPU-only)
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Copy requirements (that includes flask, waitress, whisper from GitHub)
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install python dependencies
 RUN pip install -r requirements.txt
 
-# Copy your code
+# Copy all your code, including the ffmpeg folder manually added in your repo
 COPY . .
 
-# Expose port (default Flask port)
+# Expose the flask port
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "yt_trimmer.py"]
+# Run your main app
+CMD ["python", "main.py"]
