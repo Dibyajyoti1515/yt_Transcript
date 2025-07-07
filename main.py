@@ -1,6 +1,5 @@
-# main.py
-
 from flask import Flask, request, jsonify
+from waitress import serve
 from yt_trimmer import main_func_transcribe
 
 app = Flask(__name__)
@@ -16,8 +15,9 @@ def yt_transcript():
         return jsonify({"error": "Missing url, start_time, or duration"}), 400
 
     result = main_func_transcribe(url, start, duration)
+    print(result)
     return jsonify({"transcript": result})
 
 if __name__ == "__main__":
-    from waitress import serve
+    print("Starting Youtube Notes Transcription")
     serve(app, host="0.0.0.0", port=5000)
