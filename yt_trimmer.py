@@ -3,9 +3,8 @@ from uuid import uuid4
 import os
 import whisper
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 # Global scope
 MODEL = whisper.load_model("base")
@@ -48,21 +47,52 @@ def cut_youtube_segment(url: str, start_time: str, duration: str):
         result["error"] = str(e)
         return result
 
+# def transcribe_video_clip(video_path: str, model_size="base"):
+#     print(f"Loading Whisper model: {model_size}")
+#     try:
+#
+#         ffmpeg_dir = os.path.abspath("ffmpeg/bin")
+#         os.environ["PATH"] += os.pathsep + ffmpeg_dir
+#
+#         print("Transcribing audio...")
+#         result = MODEL.transcribe(video_path, language="hi")
+#         print("Transcription complete.")
+#         return {
+#             "text": result.get("text", ""),
+#             "segments": result.get("segments", []),
+#             "language": result.get("language", "unknown")
+#         }
+#     except Exception as e:
+#         print(f"Whisper error: {e}")
+#         return {"text": "", "segments": [], "language": "error"}
+
 def transcribe_video_clip(video_path: str, model_size="base"):
     print(f"Loading Whisper model: {model_size}")
     try:
-
         ffmpeg_dir = os.path.abspath("ffmpeg/bin")
         os.environ["PATH"] += os.pathsep + ffmpeg_dir
 
-        print("Transcribing audio...")
-        result = MODEL.transcribe(video_path, language="hi")
+        print("🔍 Detecting language and transcribing...")
+        # Step 1: Detect language
+        detect_result = MODEL.transcribe(video_path)
+        detected_lang = detect_result.get("language", "unknown")
+        print(f"🌐 Detected language: {detected_lang}")
+
+        # Step 2: Translate if not Hindi
+        if detected_lang != "hi":
+            print("🌍 Translating speech to English...")
+            result = MODEL.transcribe(video_path, task="translate")
+        else:
+            print("🗣️ Hindi detected – transcribing without translation...")
+            result = detect_result
+
         print("Transcription complete.")
         return {
             "text": result.get("text", ""),
             "segments": result.get("segments", []),
             "language": result.get("language", "unknown")
         }
+
     except Exception as e:
         print(f"Whisper error: {e}")
         return {"text": "", "segments": [], "language": "error"}
@@ -77,7 +107,7 @@ def seconds_to_time_str(seconds: int):
     """Convert seconds to 'HH:MM:SS' format."""
     return str(timedelta(seconds=seconds))
 
-def main(url: str, start_time: str, duration: str, chunk_length=10):
+def main_func_transcribe(url: str, start_time: str, duration: str, chunk_length=10):
     start_seconds = time_str_to_seconds(start_time)
     total_duration = time_str_to_seconds(duration)
 
@@ -143,27 +173,27 @@ def main(url: str, start_time: str, duration: str, chunk_length=10):
     return transcript_results
 
 
-
-@app.route('/yt_notes/transcript', methods=['POST'])
-def yt_transcript():
-    data = request.json
-    url = data.get('url')
-    start = data.get('start_time')
-    duration = data.get('duration')
-
-    if not all([url, start, duration]):
-        return jsonify({"error": "Missing url, start_time, or duration"}), 400
-
-    results = main(url, start, duration)
-    return jsonify({"transcript": results})
-
-if __name__ == "__main__":
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=5000)
-
-# if __name__ == "__main__":
-#     url = "https://youtu.be/S03cRZ-NO3k?si=uAWqB1DSHAt7sIvT"
-#     start = "00:01:00"
-#     duration = "00:00:50"
 #
-#     result = main(url, start, duration)
+# @app.route('/yt_notes/transcript', methods=['POST'])
+# def yt_transcript():
+#     data = request.json
+#     url = data.get('url')
+#     start = data.get('start_time')
+#     duration = data.get('duration')
+#
+#     if not all([url, start, duration]):
+#         return jsonify({"error": "Missing url, start_time, or duration"}), 400
+#
+#     results = main(url, start, duration)
+#     return jsonify({"transcript": results})
+#
+# if __name__ == "__main__":
+#     from waitress import serve
+#     serve(app, host="0.0.0.0", port=5000)
+#
+# # if __name__ == "__main__":
+# #     url = "https://youtu.be/S03cRZ-NO3k?si=uAWqB1DSHAt7sIvT"
+# #     start = "00:01:00"
+# #     duration = "00:00:50"
+# #
+# #     result = main(url, start, duration)
