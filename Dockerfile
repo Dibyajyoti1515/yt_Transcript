@@ -14,9 +14,6 @@ RUN pip install --upgrade pip
 # Install yt-dlp
 RUN pip install yt-dlp
 
-# Install PyTorch (CPU-only)
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-
 # Copy requirements (that includes flask, waitress, whisper from GitHub)
 COPY requirements.txt .
 
