@@ -31,19 +31,28 @@ def cut_youtube_segment(url: str, start_time: str, duration: str):
         #     text=True
         # ).strip()
 
-        stream_url = subprocess.check_output(
-            ['yt-dlp', '--cookies', 'cookies.txt', '-g', url],
-            text=True
-        ).strip()
+        # stream_url = subprocess.check_output(
+        #     ['yt-dlp', '--cookies', 'cookies.txt', '-g', url],
+        #     text=True
+        # ).strip()
+        #
+        # subprocess.run([
+        #     ffmpeg_path,
+        #     '-ss', start_time,
+        #     '-i', stream_url,
+        #     '-t', duration,
+        #     '-c', 'copy',
+        #     '-y',
+        #     full_path
+        # ], check=True)
 
         subprocess.run([
-            ffmpeg_path,
-            '-ss', start_time,
-            '-i', stream_url,
-            '-t', duration,
-            '-c', 'copy',
-            '-y',
-            full_path
+            'yt-dlp',
+            '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            '--merge-output-format', 'mp4',
+            '--cookies', 'cookies.txt',
+            '-o', full_path,
+            url
         ], check=True)
 
         result["success"] = True
