@@ -26,6 +26,11 @@ def cut_youtube_segment(url: str, start_time: str, duration: str):
     }
 
     try:
+        # stream_url = subprocess.check_output(
+        #     ['yt-dlp', '--cookies', 'cookies.txt', '-g', url],
+        #     text=True
+        # ).strip()
+
         stream_url = subprocess.check_output(
             ['yt-dlp', '--cookies', 'cookies.txt', '-g', url],
             text=True
