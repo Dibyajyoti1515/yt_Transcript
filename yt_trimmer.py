@@ -10,7 +10,8 @@ from datetime import datetime, timedelta
 MODEL = whisper.load_model("base")
 
 def cut_youtube_segment(url: str, start_time: str, duration: str):
-    ffmpeg_path = './ffmpeg/bin/ffmpeg.exe'
+    # ffmpeg_path = './ffmpeg/bin/ffmpeg.exe'
+    ffmpeg_path = "ffmpeg"
     filename = f"clip_{uuid4().hex[:8]}.mp4"
     full_path = os.path.abspath(filename)
 
@@ -136,7 +137,7 @@ def main_func_transcribe(url: str, start_time: str, duration: str, chunk_length=
 
         chunk_file = f"chunk_{uuid4().hex[:8]}.mp4"
         subprocess.run([
-            './ffmpeg/bin/ffmpeg.exe',
+            'ffmpeg',
             '-ss', chunk_start_str,
             '-i', full_video_path,
             '-t', chunk_dur_str,
